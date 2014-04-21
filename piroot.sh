@@ -8,7 +8,7 @@ function usage() {
 }
 
 function is_pi() {
-  if [ -f "/boot/cmdline.txt" ]
+  if [[ ( -f "/boot/bootcode.bin" ) && ( -f "/boot/start.elf" ) && ( -f "/boot/kernel.img" ) && ( -f "/boot/cmdline.txt" ) ]]
   then
     return 0
   else
