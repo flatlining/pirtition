@@ -3,8 +3,16 @@
 
 ### Functions
 
-function usage() {
-  echo "Usage: ${0##*/} [[-h|--help] | [-i|--info] | [-s|--set partition]]"
+function usage_message() {
+  echo "Usage: ${0##*/} [[-i|--info] | [-s|--set partition]]"
+}
+
+function help_message() {
+  echo "help message()"
+}
+
+function version_message() {
+  echo "version_message()"
 }
 
 function is_pi() {
@@ -17,7 +25,7 @@ function is_pi() {
 }
 
 function error_handling() {
-  error_msg=""
+  error_msg=
   error_lvl=$1
   case "$1" in
     5)
@@ -25,19 +33,19 @@ function error_handling() {
       ;;
     *)
       error_msg="unknow error..."
-      error_lvl=99
+      error_lvl=1
       ;;
   esac
   echo "${0##*/}: $error_msg"
   exit $error_lvl
 }
 
-function info_part() {
-  echo "info"
+function info_partition() {
+  echo "info_partition()"
 }
 
-function set_part() {
-  echo "set"
+function set_partition() {
+  echo "set_partition()"
 }
 
 ### Main
@@ -50,11 +58,22 @@ CMDLINE=`cat /boot/cmdline.txt`
 CURRENT_ROOT=`lsblk -l -p -n -o NAME,TYPE,MOUNTPOINT,FSTYPE | grep part | grep -v vfat | grep "/ " | cut -d" " -f1`
 ALLOWED_ROOT=(`lsblk -l -p -n -o NAME,TYPE,FSTYPE,SIZE | grep part | grep -v vfat | grep -v 1K | cut -d" " -f1`)
 
-case "$1" in
-  -s)
-    set_part
-  ;;
-  *)
-    usage
-  ;;
+new_root=
+
+case $1 in
+    -V | --version )     version_message
+                         exit
+                         ;;
+    -h | --help )        help_message
+                         exit
+                         ;;
+    -i | --info )        info_partition
+                         exit
+                         ;;
+    -s | --set )         set_partition
+                         exit
+                         ;;            
+     * )                 usage_message
+                         exit 1
+                         ;;
 esac
