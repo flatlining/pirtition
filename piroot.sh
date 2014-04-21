@@ -45,7 +45,7 @@ function info_partition() {
 }
 
 function set_partition() {
-  echo "set_partition()"
+  echo "set_partition() $1"
 }
 
 ### Main
@@ -58,8 +58,6 @@ CMDLINE=`cat /boot/cmdline.txt`
 CURRENT_ROOT=`lsblk -l -p -n -o NAME,TYPE,MOUNTPOINT,FSTYPE | grep part | grep -v vfat | grep "/ " | cut -d" " -f1`
 ALLOWED_ROOT=(`lsblk -l -p -n -o NAME,TYPE,FSTYPE,SIZE | grep part | grep -v vfat | grep -v 1K | cut -d" " -f1`)
 
-new_root=
-
 case $1 in
     -V | --version )     version_message
                          exit
@@ -70,7 +68,8 @@ case $1 in
     -i | --info )        info_partition
                          exit
                          ;;
-    -s | --set )         set_partition
+    -s | --set )         shift
+                         set_partition $1
                          exit
                          ;;            
      * )                 usage_message
