@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+
+### Functions
+
 function usage() {
-  echo "usage"
+  echo "Usage: ${0##*/} [[-h|--help] | [-i|--info] | [-s|--set partition]]"
 }
 
 function is_pi() {
@@ -13,6 +16,22 @@ function is_pi() {
   fi
 }
 
+function error_handling() {
+  error_msg=""
+  error_lvl=$1
+  case "$1" in
+    5)
+      error_msg="you are not on a Raspberry Pi!"
+      ;;
+    *)
+      error_msg="unknow error..."
+      error_lvl=99
+      ;;
+  esac
+  echo "${0##*/}: $error_msg"
+  exit $error_lvl
+}
+
 function info_part() {
   echo "info"
 }
@@ -21,9 +40,10 @@ function set_part() {
   echo "set"
 }
 
+### Main
+
 if ! is_pi; then
-  echo "Not a raspberry pi"
-  exit 1
+  error_handling 5
 fi
 
 CMDLINE=`cat /boot/cmdline.txt`
@@ -35,6 +55,6 @@ case "$1" in
     set_part
   ;;
   *)
-    info_part
+    usage
   ;;
 esac
