@@ -54,7 +54,7 @@ function error_handling()
 {
   local error_msg=
   local error_lvl=$1
-  case "$1" in
+  case "$error_lvl" in
     5) error_msg="you are not on a Raspberry Pi!"
        ;;
     6) error_msg="you need to inform the new root partition"
@@ -84,20 +84,31 @@ $(for _p in ${allowed_root[@]}; do echo " $_p"; done)
 
 function set_partition()
 {
-  if [ -z $1 ]
+  local new_partition=$1
+  if [ -z $new_partition ]
   then
     error_handling 6
   fi
-  if [ $1 == $current_root ]
+  if [ $new_partition == $current_root ]
   then
-    error_handling 7 $1
+    error_handling 7 $new_partition
   fi
   # http://stackoverflow.com/a/15394738
-  if [[ ! " ${allowed_root[@]} " =~ " $1 " ]]
+  if [[ ! " ${allowed_root[@]} " =~ " $new_partition " ]]
   then
-    error_handling 8 $1
+    error_handling 8 $new_partition
   fi
+
+  local new_part_fs=`lsblk -l -p -o FSTYPE  -n $new_partition`
+  local cur_part_fs=`lsblk -l -p -o FSTYPE  -n $current_root`
+
+  local new_part_re="root=${new_partition//\//\\/}"
+  local cur_part_re="root=${current_root//\//\\/}"
+  local part_re="s/$cur_part_re/$new_part_re/g;s/rootfstype=$cur_part_fs/rootfstype=$new_part_fs/g"
+
   local cmdline=`cat /boot/cmdline.txt`
+
+  echo $(sed $part_re <<< $cmdline)
 }
 
 function load_root_data()
