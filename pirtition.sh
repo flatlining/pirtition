@@ -26,7 +26,7 @@ $(usage_message)
 Options:
  -i, --info             display current configurations
  -s, --set <partition>  set new root partition
-                        need's root privilege
+                        need root privileges
 
  -h, --help             display this help and exit
  -V, --version          output version information and exit
@@ -54,8 +54,7 @@ function is_pi()
 function error_handling()
 {
   local error_msg=
-  local error_lvl=$1
-  case "$error_lvl" in
+  case "$1" in
     5) error_msg="you are not on a Raspberry Pi!"
        ;;
     6) error_msg="you need to inform the new root partition"
@@ -64,12 +63,13 @@ function error_handling()
        ;;
     8) error_msg="$2 is not a valid root partition candidate"
        ;;
+    9) error_msg="you need root privileges"
+       ;;
     *) error_msg="unknow error..."
-       error_lvl=1
        ;;
   esac
-  echo "$PROGNAME: $error_msg"
-  exit $error_lvl
+  echo "$PROGNAME: $error_msg" 1>&2
+  exit 1
 }
 
 function info_partition()
@@ -106,8 +106,12 @@ function set_partition()
   local sed_expr="s/root=${current_root//\//\\/}/root=${new_partition//\//\\/}/g;s/rootfstype=$cur_part_fs/rootfstype=$new_part_fs/g"
 
   echo "Changing root partition: $current_root ($cur_part_fs) to $new_partition ($new_part_fs)..."
-  sed -i $sed_expr /boot/cmdline.txt
-  echo "Done! you should reboot now"
+  if sed -i $sed_expr /boot/cmdline.txt
+  then
+    echo "Done! you should reboot now"
+  else
+    error_handling 9
+  fi
 }
 
 function load_root_data()
