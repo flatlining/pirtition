@@ -1,21 +1,47 @@
 #!/usr/bin/env bash
 
+# https://home.comcast.net/~dwm042/Standards.htm
 
-### Functions
+##### Constants
 
-function usage_message() {
-  echo "Usage: ${0##*/} [[-i|--info] | [-s|--set partition]]"
+PROGNAME=${0##*/}
+PROGVERSION="0.0.1"
+
+##### Functions
+
+function usage_message()
+{
+  echo "Usage:
+ $PROGNAME [[-i|--info] | [-s|--set <partition>]]"
 }
 
-function help_message() {
-  echo "help message()"
+function help_message()
+{
+  echo "
+Define a new root partition on cmdline.txt for your Raspberry Pi
+Can be in the memory card or in a connected usb memory
+
+$(usage_message)
+
+Options:
+ -i, --info             display current configurations
+ -s, --set <partition>  set new root partition
+
+ -h, --help             display this help and exit
+ -V, --version          output version information and exit
+
+Must be run with root privileges
+Reboot to changes take effect
+"
 }
 
-function version_message() {
-  echo "version_message()"
+function version_message()
+{
+  echo "$PROGNAME version $PROGVERSION"
 }
 
-function is_pi() {
+function is_pi()
+{
   if [[ ( -f "/boot/bootcode.bin" ) && ( -f "/boot/start.elf" ) && ( -f "/boot/kernel.img" ) && ( -f "/boot/cmdline.txt" ) ]]
   then
     return 0
@@ -24,7 +50,8 @@ function is_pi() {
   fi
 }
 
-function error_handling() {
+function error_handling()
+{
   local error_msg=
   local error_lvl=$1
   case "$1" in
@@ -40,20 +67,23 @@ function error_handling() {
   exit $error_lvl
 }
 
-function info_partition() {
+function info_partition()
+{
   echo "info_partition()"
 }
 
-function set_partition() {
+function set_partition()
+{
   echo "set_partition() $1"
 }
 
-function load_root_data() {
+function load_root_data()
+{
   current_root=`lsblk -l -p -n -o NAME,TYPE,MOUNTPOINT,FSTYPE | grep part | grep -v vfat | grep "/ " | cut -d" " -f1`
   allowed_root=(`lsblk -l -p -n -o NAME,TYPE,FSTYPE,SIZE | grep part | grep -v vfat | grep -v 1K | cut -d" " -f1`)
 }
 
-### Main
+##### Main
 
 if ! is_pi; then
   error_handling 5
@@ -66,7 +96,7 @@ allowed_root=
 
 case $1 in
     -V | --version )     version_message
-                         exit
+                         exit 1
                          ;;
     -h | --help )        help_message
                          exit
