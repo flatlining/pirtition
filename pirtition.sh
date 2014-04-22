@@ -69,7 +69,13 @@ function error_handling()
 
 function info_partition()
 {
-  echo "info_partition()"
+  echo "
+Current root partition:
+ $current_root
+
+Partition candidates:
+$(for _p in ${allowed_root[@]}; do echo " $_p"; done)
+"
 }
 
 function set_partition()
