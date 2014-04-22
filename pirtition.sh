@@ -26,6 +26,7 @@ $(usage_message)
 Options:
  -i, --info             display current configurations
  -s, --set <partition>  set new root partition
+                        need's root privilege
 
  -h, --help             display this help and exit
  -V, --version          output version information and exit
@@ -104,7 +105,9 @@ function set_partition()
 
   local sed_expr="s/root=${current_root//\//\\/}/root=${new_partition//\//\\/}/g;s/rootfstype=$cur_part_fs/rootfstype=$new_part_fs/g"
 
+  echo "Changing root partition: $current_root ($cur_part_fs) to $new_partition ($new_part_fs)..."
   sed -i $sed_expr /boot/cmdline.txt
+  echo "Done! you should reboot now"
 }
 
 function load_root_data()
