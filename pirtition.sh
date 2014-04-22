@@ -55,15 +55,19 @@ function error_handling()
   local error_msg=
   local error_lvl=$1
   case "$1" in
-    5)
-      error_msg="you are not on a Raspberry Pi!"
-      ;;
-    *)
-      error_msg="unknow error..."
-      error_lvl=1
-      ;;
+    5) error_msg="you are not on a Raspberry Pi!"
+       ;;
+    6) error_msg="you need to inform the new root partition"
+       ;;
+    7) error_msg="$2 is already the root partition"
+       ;;
+    8) error_msg="$2 is not a valid root partition candidate"
+       ;;
+    *) error_msg="unknow error..."
+       error_lvl=1
+       ;;
   esac
-  echo "${0##*/}: $error_msg"
+  echo "$PROGNAME: $error_msg"
   exit $error_lvl
 }
 
@@ -80,7 +84,20 @@ $(for _p in ${allowed_root[@]}; do echo " $_p"; done)
 
 function set_partition()
 {
-  echo "set_partition() $1"
+  if [ -z $1 ]
+  then
+    error_handling 6
+  fi
+  if [ $1 == $current_root ]
+  then
+    error_handling 7 $1
+  fi
+  # http://stackoverflow.com/a/15394738
+  if [[ ! " ${allowed_root[@]} " =~ " $1 " ]]
+  then
+    error_handling 8 $1
+  fi
+  local cmdline=`cat /boot/cmdline.txt`
 }
 
 function load_root_data()
@@ -94,8 +111,6 @@ function load_root_data()
 if ! is_pi; then
   error_handling 5
 fi
-
-#CMDLINE=`cat /boot/cmdline.txt`
 
 current_root=
 allowed_root=
