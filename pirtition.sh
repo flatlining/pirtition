@@ -102,13 +102,9 @@ function set_partition()
   local new_part_fs=`lsblk -l -p -o FSTYPE  -n $new_partition`
   local cur_part_fs=`lsblk -l -p -o FSTYPE  -n $current_root`
 
-  local new_part_re="root=${new_partition//\//\\/}"
-  local cur_part_re="root=${current_root//\//\\/}"
-  local part_re="s/$cur_part_re/$new_part_re/g;s/rootfstype=$cur_part_fs/rootfstype=$new_part_fs/g"
+  local sed_expr="s/root=${current_root//\//\\/}/root=${new_partition//\//\\/}/g;s/rootfstype=$cur_part_fs/rootfstype=$new_part_fs/g"
 
-  local cmdline=`cat /boot/cmdline.txt`
-
-  echo $(sed $part_re <<< $cmdline)
+  sed -i $sed_expr /boot/cmdline.txt
 }
 
 function load_root_data()
